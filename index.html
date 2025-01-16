@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>let it be</title>
+<script src="script.js"></script>
+<style>
+ body {
+  margin: 0;
+  padding: 0;
+  background-image: url('bg.png');
+  //background-color: #f0f0f0; /* 备用背景颜色 */
+  background-size: contain; /* 覆盖整个视口 */
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+  .container {
+    position: relative;
+  }
+  .div1, .div2 {
+    position: absolute;
+    
+  }
+  .div1 {
+    //background-color: red; 
+    background-image: url('zz.png');
+    background-size: contain; /* 确保图片覆盖整个按钮 */
+    background-position: center; /* 图片居中 */
+    background-repeat: no-repeat; /* 防止图片重复 */
+    z-index: 1;
+    transform: translate(-50%, -50%); /* 使用 transform 居中按钮 */
+    /* 设置宽高 */
+    width: 400px;
+    height: 400px;
+  }
+  .div2 {
+    //background-color: blue; /* 可以根据需要更改颜色 */
+    /* 如果你想要第二个div在第一个之上，可以设置z-index */
+    //width: 350px; /* 设置宽度为视口宽度 */
+    //height: 350px; /* 维持宽高比 */
+    z-index: 0;
+    transform: translate(-50%, -50%); /* 使用 transform 居中按钮 */
+  }
+
+  #startButton {
+  background-color: transparent;
+  width: 400px; /* 根据你的图片调整宽度 */
+  height: 400px; /* 根据你的图片调整高度 */
+  border: none; /* 移除默认边框 */
+  cursor: pointer; /* 更改鼠标指针为手型 */
+  position: absolute; /* 必须设置位置属性 */
+}
+
+.button-text {
+    position: absolute;
+    bottom: 85px; /* 固定在底部 */
+    left: 50%;
+    transform: translateX(-50%); /* 水平居中 */
+    /* 设置字体大小 */
+    font-size: 66px; /* 你可以根据需要调整大小 */
+
+    /* 设置字体颜色 */
+    color: gold; /* 例如金色 */
+
+    /* 设置字体粗细 */
+    font-weight: bold; /* 加粗字体，也可以使用数值如700 */
+}
+
+#customButton {
+    border: none; /* 移除默认边框 */
+    cursor: pointer; /* 更改鼠标指针为手型 */
+    background-color: transparent;
+    width:100px;
+    height:100px;
+    position: fixed;
+    top: 10px;
+    right: 110px;
+    z-index: 1000; /* 确保按钮在页面其他元素之上 */
+}
+
+
+
+.hidden {
+    display: none;
+}
+
+#popupContainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    z-index: 1001; /* 确保弹出层在按钮之上 */
+    width: 400px; /* 设置宽度 */
+    height: 300px; /* 设置高度 */
+}
+
+#inputText {
+    width: 100%; /* 让文本框占满整个宽度 */
+    height: 300px; /* 增加文本框的高度 */
+    padding: 10px; /* 增加文本框内的内边距 */
+    font-size: 36px; /* 增大字体 */
+    resize: none; /* 防止用户手动调整大小 */
+}
+
+#saveButton, #closeButton {
+    padding: 10px 20px; /* 增加按钮的内边距 */
+    font-size: 30px; /* 增大按钮上的文字 */
+    margin-top: 10px; /* 在按钮顶部添加一些间距 */
+}
+
+</style>
+
+
+
+</head>
+<body>
+<!-- 右上角的自定义按钮 -->
+    <div class="div3"><button id="customButton"><img src="1.png" width="200px" /></button></div>
+
+    <!-- 弹出内容 -->
+    <div id="popupContainer" class="hidden">
+        <textarea id="inputText" placeholder="在这里输入文本...">炸猪排,大盘鸡,沙茶土豆牛腩,咖喱蟹块,黄豆芽油豆腐肉丝,平菇肉糜茄子,冬瓜毛豆方腿,玉米棒</textarea>
+        <button id="saveButton">保存</button>
+        <button id="closeButton">关闭</button>
+    </div>
+
+
+<div class="container">
+  <div class="div1" id="myDiv1"><button id="startButton" aria-label="开始">
+    <span class="button-text">开始</span>
+    </button>
+  </div>
+  <div class="div2" id="myDiv"><canvas id="wheelCanvas" ></canvas></div>
+</div>
+
+<script>
+      // 在最外层作用域定义全局变量
+let globalTextData = "炸猪排,大盘鸡,沙茶土豆牛腩,咖喱蟹块,黄豆芽油豆腐肉丝,平菇肉糜茄子,冬瓜毛豆方腿,玉米棒";
+// 从 LocalStorage 中读取数据，并尝试解析JSON字符串
+    const savedData = localStorage.getItem('globalTextData');
+    if (savedData) {
+        try {
+            globalTextData = JSON.parse(savedData);
+            console.log("Recovered globalTextData:", globalTextData);
+        } catch(e) {
+            console.error("Error parsing globalTextData from localStorage:", e);
+        }
+    }
+
+    
+// ... JavaScript 代码保持不变 ...
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+// 假设你有一个id为 "myDiv" 的 div 元素
+var div = document.getElementById('myDiv');
+//var div1 = document.getElementById('myDiv1');
+
+var r = 800;
+
+  function resizeCanvas() {
+    
+    canvas.width = r;//window.innerWidth;
+    div.style.width = r+'px'; // 设置宽度
+    div.style.height = r+'px'; // 设置高度  
+    canvas.height = canvas.width;//window.innerHeight; // 
+
+    //div1.style.width = r/3+'px'; // 设置宽度
+    //div1.style.height = r/3+'px'; // 设置高度
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas(); // 初始化设置
+
+// 获取画布的中心点坐标
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+
+// 将坐标系原点移动到画布中心
+//ctx.translate(-centerX, -centerY);
+
+const startButton = document.getElementById('startButton');
+
+// 修改文本颜色和大小
+    // startButton.style.fontSize = '60px'; // 设置字体大小，记得包含单位
+    // startButton.style.color = 'gold'; // 设置颜色为金色
+    // startButton.style.fontWeight = 'bold'; // 加粗字体
+cai =  globalTextData.split(','); // 分割字符串为数组
+//["炸猪排","大盘鸡","沙茶土豆牛腩","咖喱蟹块","黄豆芽油豆腐肉丝","平菇肉糜茄子","冬瓜毛豆方腿","玉米棒"];
+    // JavaScript
+var buttonText = document.querySelector('#startButton .button-text');
+// 设置文本内容
+buttonText.textContent = "开始";
+
+const wheelRadius = canvas.width / 2;
+const n = cai.length; // 扇区的数量
+let angle = 0; // 指针的当前角度
+let spinning = false; // 是否正在旋转
+let spinInterval;
+
+
+
+// 绘制圆盘和扇区
+function drawWheel() { 
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const sliceAngle = (2 * Math.PI) / n;
+  for (let i = 0; i < n; i++) {
+    // 绘制扇区
+    ctx.beginPath();
+    ctx.moveTo(wheelRadius, wheelRadius);
+    ctx.arc(wheelRadius, wheelRadius, wheelRadius, i * sliceAngle, (i + 1) * sliceAngle);
+    ctx.closePath();
+    ctx.fillStyle = i % 2 == 0 ? '#ffe4e1' : '#ffffff'; // 浅粉色和白色交替
+    // 设置填充颜色，并包含透明度
+    //ctx.fillStyle = `rgba(0,255,0,0.8)`;
+    ctx.fill();
+    ctx.strokeStyle = 'green'; // 设置边框颜色为绿色
+    ctx.lineWidth = 0.1;
+    ctx.stroke();
+
+    // 绘制扇区编号
+    ctx.save();
+    ctx.translate(wheelRadius, wheelRadius);
+    ctx.rotate((i + 0.5) * sliceAngle);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = 'green';
+    ctx.font = '44px Arial';
+    //ctx.fillText(i + 1+"青菜", wheelRadius - 10, 5);
+    cai =  globalTextData.split(','); // 分割字符串为数组
+    ctx.fillText(cai[i], wheelRadius - 10, 5);
+    ctx.restore();
+  }
+}
+
+
+
+// 旋转圆盘
+function spinWheel() {
+  angle = (angle + 10) % 360; // 每次旋转增加10度
+  ctx.save();
+  ctx.translate(wheelRadius, wheelRadius);
+  ctx.rotate((angle-90) * Math.PI / 180);//指针向上
+  ctx.translate(-wheelRadius, -wheelRadius);
+  drawWheel();
+  //drawPointer();
+  ctx.restore();
+}
+
+// 开始/停止旋转
+startButton.addEventListener('click', function() {
+  if (!spinning) {
+    spinInterval = setInterval(spinWheel, 1000 / 60); // 每秒60帧
+    buttonText.textContent = "停止";
+    
+  } else {
+    clearInterval(spinInterval);
+    //const sector = Math.floor((360 - angle) / (360 / n)) + 1;
+    //alert(cai[sector-1]);
+    // 确保angle在0到360度之间（不包括360度，如果360度是有效的，则需要特别处理）
+if (angle < 0 || angle >= 360) {
+    console.error('Invalid angle value');
+    // 可以选择返回一个默认值或抛出一个错误
+    return;
+}
+
+// 确保n是一个正整数
+if (!Number.isInteger(n) || n <= 0) {
+    console.error('Invalid number of sectors');
+    // 可以选择返回一个默认值或抛出一个错误
+    return;
+}
+
+// 计算扇区索引
+const sector = Math.floor((360 - angle) / (360 / n)) + 1;
+
+// 检查扇区索引是否有效
+if (sector < 1 || sector > cai.length) {
+    console.error('Sector index out of bounds');
+    // 可以选择返回一个默认值、抛出一个错误或显示一个错误消息
+    return;
+}
+
+// 安全地访问数组元素
+alert(cai[sector - 1]);
+    buttonText.textContent = "开始";
+  }
+  spinning = !spinning;
+});
+
+drawWheel();
+
+
+</script>
+
+</body>
+
+</html>
+
+
+
